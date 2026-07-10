@@ -1,6 +1,8 @@
 import requests
 from pypdf import PdfReader
 import io
+import os
+import time
 
 arxiv_ids = [
     "2506.16988",
@@ -17,14 +19,21 @@ arxiv_ids = [
 
 
 def fetch_paper(arxiv_id: str, out_dir: str = "data/raw"):
-    url = f"https://arxiv.org/pdf/{arxiv_id}"
-    resp = requests.get(url, timeout=30)
-    resp.raise_for_status()
-    reader = PdfReader(io.BytesIO(resp.content))
-    text = "\n".join(page.extract_text() or "" for page in reader.pages)
-    with open(f"{out_dir}/{arxiv_id}.txt", "w", encoding="utf-8") as f:
-        f.write(text)
+    os.makedirs(out_dir, exist_ok=True)
+    try:
+        url = f"https://arxiv.org/pdf/{arxiv_id}"
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        reader = PdfReader(io.BytesIO(resp.content))
+        text = "\n".join(page.extract_text() or "" for page in reader.pages)
+        with open(f"{out_dir}/{arxiv_id}.txt", "w", encoding="utf-8") as f:
+            f.write(text)
+        return True
+    except Exception as e:
+        print(f"FAILD {arxiv_id}: e")
+        return False
 
 
 for id in arxiv_ids:
     fetch_paper(id)
+    time.sleep(1)

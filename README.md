@@ -33,11 +33,6 @@ Full text (not just abstracts) is fetched via the arXiv PDF endpoint and stored 
 plain text in `data/raw/`, to support fine-grained chunk-level retrieval rather than
 whole-paper matching.
 
-## Status
-
-🚧 Work in progress. Currently: corpus ingestion complete. Baseline RAG, multi-agent
-pipeline, and evaluation harness are in progress — see milestones below.
-
 ## Roadmap
 
 - [x] M1: Corpus ingestion + baseline single-shot RAG
@@ -45,3 +40,25 @@ pipeline, and evaluation harness are in progress — see milestones below.
 - [ ] M3: Critic agent + faithfulness scoring
 - [ ] M4: Gold evaluation set + comparison harness
 - [ ] M5: CI, Streamlit demo, final polish
+
+## Pipeline
+
+(To be completed)
+
+**Known limitations (to revisit in later milestones):**
+
+- Retrieval sometimes surfaces bibliography/reference-list chunks, since reference
+  entries lexically overlap with query terms (paper titles, author names) without
+  containing explanatory content. Not yet filtered — candidate fix for M4/M5.
+- Retrieval is pure vector similarity (FAISS) with no keyword/exact-match component.
+  A production system would likely use hybrid search (vector + BM25); out of scope
+  here given corpus size, but noted as a "future work" item.
+
+## Tech Stack
+
+- Python 3.10+
+- `sentence-transformers` (embeddings, local/free)
+- FAISS (vector index, local/free)
+- Groq API (LLM generation — free tier)
+- MLflow (experiment tracking — planned, M4)
+- Streamlit (demo UI — planned, M5)

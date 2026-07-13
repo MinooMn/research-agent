@@ -28,6 +28,10 @@ def answer_question(query: str) -> dict:
 
 
 if __name__ == "__main__":
-    result = answer_question("what is multi-hop question answering?")
+    question = """
+    Which of the papers in this corpus cite Self-RAG, and what do they each say its main limitation is?
+    """
+    result = answer_question(question)
+    print("Question: ", question)
     print("Answer:", result["answer"])
     print("Sources:", result["chunk_ids"])

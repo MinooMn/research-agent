@@ -8,23 +8,20 @@ import json
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
-
-INDEX_PATH = "data/index/faiss.index"
-CHUNKS_PATH = "data/chunked_corpus/chunks.jsonl"
-TOP_K = 5
+from config import INDEX_PATH, CORPUS_CHUNKS_PATH, EMBEDDER_MODEL, RETRIEVAL_TOP_K
 
 # Load chunks (row order must match what was embedded/indexed)
 chunks = []
-with open(CHUNKS_PATH, "r", encoding="utf-8") as f:
+with open(CORPUS_CHUNKS_PATH, "r", encoding="utf-8") as f:
     for line in f:
         chunks.append(json.loads(line))
 
 # Load index + model
 index = faiss.read_index(INDEX_PATH)
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer(EMBEDDER_MODEL)
 
 
-def search(query: str, top_k: int = TOP_K):
+def search(query: str, top_k: int = RETRIEVAL_TOP_K):
     query_vec = model.encode([query], convert_to_numpy=True).astype(np.float32)
     distances, indices = index.search(query_vec, top_k)
 

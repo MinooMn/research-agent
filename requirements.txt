@@ -2,3 +2,5 @@ requests
 pypdf
 sentence_transformers
 faiss-cpu
+openai
+dotenv

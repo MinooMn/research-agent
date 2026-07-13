@@ -3,16 +3,14 @@ import os
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
-
-INDEX_PATH = "data/index"
-CHUNKS_PATH = "data/chunked_corpus/chunks.jsonl"
+from config import EMBEDDER_MODEL, INDEX_PATH, CORPUS_CHUNKS_PATH
 
 os.makedirs(INDEX_PATH, exist_ok=True)
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer(EMBEDDER_MODEL)
 
 chunks = []
-with open(CHUNKS_PATH) as f:
+with open(CORPUS_CHUNKS_PATH) as f:
     for line in f:
         chunks.append(json.loads(line))
 

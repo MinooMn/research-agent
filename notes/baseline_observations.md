@@ -29,9 +29,7 @@ verifying by hand before drawing a stronger conclusion.
 
 ---
 
-## Q2: "How does A-RAG's approach to retrieval differ from RAGentA's, and which one
-
-reports better performance?"
+## Q2: "How does A-RAG's approach to retrieval differ from RAGentA's, and which one reports better performance?"
 
 **Answer:** Partially answered. Refused the "how do approaches differ" half, but
 correctly answered "which performs better" — citing that A-RAG (Naive and Full)
@@ -70,9 +68,7 @@ even though the question explicitly asks about two.
 
 ---
 
-## Q4: "Which of the papers in this corpus cite Self-RAG, and what do they each say
-
-its main limitation is?"
+## Q4: "Which of the papers in this corpus cite Self-RAG, and what do they each say its main limitation is?"
 
 **Answer:** Refused entirely — "does not provide a list of papers that cite it or
 their respective comments on its limitations."

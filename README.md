@@ -39,14 +39,14 @@ whole-paper matching.
 
 ## Status
 
-🚧 Work in progress. Corpus ingestion, chunking, retrieval, and a working baseline
-single-shot RAG pipeline (retrieval + generation) are complete. Next: planner and
-retriever agents (M2).
+🚧 Work in progress. Corpus ingestion, chunking, retrieval, baseline single-shot RAG,
+and planner + retriever agents are complete. Next: critic agent + faithfulness
+scoring (M3).
 
 ## Roadmap
 
 - [x] M1: Corpus ingestion + baseline single-shot RAG
-- [ ] M2: Planner + retriever agents
+- [x] M2: Planner + retriever agents
 - [ ] M3: Critic agent + faithfulness scoring
 - [ ] M4: Gold evaluation set + comparison harness
 - [ ] M5: CI, Streamlit demo, final polish
@@ -63,31 +63,44 @@ retriever agents (M2).
    `{arxiv_id, chunk_index, chunk_id, chunk_text}`. Currently 448 chunks across the
    10-paper corpus.
 3. `src/ingestion/embed_and_index.py` — embeds each chunk with
-   `sentence-transformers/all-MiniLM-L6-v2` (chosen for speed on CPU-only hardware,
-   zero cost, and being the standard default for this kind of RAG prototype) and
-   builds a FAISS `IndexFlatL2` index (exact search — more than sufficient at this
-   corpus size). Index saved to `data/index/faiss.index`; row order corresponds
-   directly to line order in `chunks.jsonl`.
-4. `src/ingestion/sanity_check_retrieval.py` — manual sanity check: embeds a test
-   query, retrieves top-k chunks, prints source paper/chunk for each. Verified
-   retrieval correctly surfaces the most relevant paper/section for test queries.
+   `sentence-transformers/all-MiniLM-L6-v2` and builds a FAISS `IndexFlatL2` index
+   (exact search — sufficient at this corpus size). Index saved to
+   `data/index/faiss.index`; row order corresponds directly to line order in
+   `chunks.jsonl`.
+4. `src/ingestion/sanity_check_retrieval.py` — manual sanity check confirming
+   retrieval surfaces the correct source paper/section for test queries.
 
 **Baseline RAG (single-shot):**
 
 - `src/retrieval.py` — shared retrieval module: embeds a query, searches the FAISS
-  index, returns top-k chunks with `chunk_id`, distance, and text. Used by both the
-  baseline pipeline and (later) the retriever agent.
+  index, returns top-k chunks with `chunk_id`, distance, and text.
 - `src/llm_client.py` — thin, generic wrapper around the Groq API
-  (`llama-3.3-70b-versatile` by default). Takes a prompt, returns generated text.
-  Deliberately has no knowledge of retrieval/RAG — kept generic so the planner and
-  critic agents (M2/M3) can reuse it for non-retrieval LLM calls.
-- `src/baseline/rag_pipeline.py` — orchestrates the baseline pipeline: retrieve
-  top-k chunks for a question → build a grounding-instructed prompt (explicitly
-  told to answer only from context and say so if context is insufficient) → call
-  `llm_client.generate()` → return `{query, answer, chunk_ids}`. Manually verified:
-  correctly answers grounded questions, and correctly declines to answer when the
-  retrieved context doesn't cover the question (e.g. a generic "what are
-  transformers?" query outside the corpus's actual content).
+  (`llama-3.3-70b-versatile` by default). No knowledge of retrieval/RAG — reused by
+  the baseline pipeline and all agents.
+- `src/baseline/rag_pipeline.py` — retrieve top-k chunks → grounding-instructed
+  prompt (answer only from context, say so if insufficient) → generate → return
+  `{query, answer, chunk_ids}`.
+- See `notes/day4_baseline_observations.md` for manual multi-hop test results
+  against the baseline: two distinct failure modes identified — **retrieval
+  coverage failure** (top-k search skews toward one source even when a question
+  spans two) and **synthesis failure** (relevant chunks from multiple sources are
+  retrieved, but the model doesn't reliably combine them, defaulting to refusal).
+
+**Planner + Retriever agents (M2):**
+
+- `src/agents/planner.py` — decomposes a question into up to 2 sub-questions using
+  the LLM, with a structured-JSON output contract (parsed defensively — strips
+  markdown code fences before parsing). Prompt uses explicit few-shot examples
+  showing both single-hop (unsplit) and 2-hop (decomposed) cases; an earlier
+  version without worked examples over-decomposed simple single-concept questions,
+  fixed by adding the examples (see `notes/m2_agent_observations.md`).
+- `src/agents/retriever.py` — for each sub-question independently: retrieves top-k
+  chunks, generates a grounded answer with **inline `[chunk_id]` citations per
+  claim** (rather than a single citation list produced after the fact, so each
+  claim is traceable to a specific source at generation time — this also gives the
+  upcoming critic agent claim-level granularity to verify against). Cited chunk_ids
+  are extracted via regex and deduplicated; falls back to all retrieved chunk_ids
+  if the model doesn't cite inline.
 
 **Known limitations (to revisit in later milestones):**
 
@@ -99,6 +112,19 @@ retriever agents (M2).
   here given corpus size, but noted as a "future work" item.
 - Chunking uses whitespace-based word counts as a proxy for token count, not the
   embedding model's actual tokenizer — close enough at this chunk size, but not exact.
+- **Sub-questions are retrieved and answered independently, not sequentially** — a
+  later sub-question's retrieval/prompt has no knowledge of an earlier sub-question's
+  answer. This is fine for independently-answerable multi-hop questions (e.g.
+  comparing two papers' reported metrics) but weakens performance on questions with
+  true sequential dependency (e.g. "what limitation does A identify in B, and how
+  does A's mechanism address it" — the second half genuinely needs the first half's
+  specific answer to evaluate properly). Documented via manual testing rather than
+  fixed, given project time constraints; see `notes/m2_agent_observations.md`. The
+  M4 gold eval set will tag questions as "independent" vs. "dependent" multi-hop to
+  surface this gap explicitly rather than average it away.
+- The model's confidence-hedging is inconsistent within single answers (observed
+  hedging at the start of an answer, stating claims plainly in the middle, then
+  re-hedging at the end) — a good target for the critic agent to probe in M3.
 
 ## Setup
 
@@ -113,8 +139,7 @@ retriever agents (M2).
    cp .env.example .env
    ```
 4. The corpus, chunks, and FAISS index are already committed under `data/` for
-   reproducibility — no need to re-run ingestion unless you want to rebuild it from
-   scratch:
+   reproducibility — no need to re-run ingestion unless rebuilding from scratch:
    ```
    python src/ingestion/fetch_corpus.py
    python src/ingestion/chunk_corpus.py
@@ -123,6 +148,11 @@ retriever agents (M2).
 5. Test the baseline RAG pipeline:
    ```
    python src/baseline/rag_pipeline.py
+   ```
+6. Test the planner + retriever agents:
+   ```
+   python src/agents/planner.py
+   python src/agents/retriever.py
    ```
 
 ## Tech Stack

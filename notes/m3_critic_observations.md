@@ -51,3 +51,27 @@ comparison, so this bias is likely present in both conditions rather than
 favoring one over the other — a relative comparison between the two pipelines
 remains meaningful even though the absolute faithfulness numbers are probably
 somewhat inflated for both.
+
+---
+
+## Deliberately unfaithful test cases
+
+Ran 3 hand-crafted cases against `check_faithfulness()`: a wrong-number claim
+(real chunk, fabricated F1 score), an off-topic claim (real chunk, fabricated
+fact about ProRAG's origin), and a known-good control (reused from Day 7).
+
+**Results:** control case correctly scored `supported` (1.0). Both fabricated
+cases correctly scored `0.0` faithfulness -- the critic did not mark either as
+falsely "supported." However, both were labeled `unsupported` rather than one
+being labeled `contradicted` -- the critic isn't reliably distinguishing "source
+says otherwise" from "source doesn't address this at all," despite the wrong-
+number case being a clear contradiction (source states 51.6, claim states 85).
+
+**Verdict:** core validation requirement met -- the critic correctly flags
+fabricated/unfaithful claims and does not silently mark them as supported. The
+contradicted-vs-unsupported category distinction is a known, minor limitation,
+likely fixable with few-shot examples in the critic prompt, but not pursued
+further given project time constraints. `faithfulness_score` (based on
+supported-vs-not) is unaffected by this category confusion, since both
+"unsupported" and "contradicted" count identically as not-supported in the
+current scoring formula.

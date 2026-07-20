@@ -41,7 +41,7 @@ whole-paper matching.
 
 - [x] M1: Corpus ingestion + baseline single-shot RAG
 - [x] M2: Planner + retriever agents
-- [ ] M3: Critic agent + faithfulness scoring
+- [x] M3: Critic agent + faithfulness scoring
 - [ ] M4: Gold evaluation set + comparison harness
 - [ ] M5: CI, Streamlit demo, final polish
 

@@ -37,12 +37,6 @@ Full text (not just abstracts) is fetched via the arXiv PDF endpoint and stored 
 plain text in `data/raw/`, to support fine-grained chunk-level retrieval rather than
 whole-paper matching.
 
-## Status
-
-🚧 Work in progress. Corpus ingestion, chunking, retrieval, baseline single-shot RAG,
-and planner + retriever agents are complete. Next: critic agent + faithfulness
-scoring (M3).
-
 ## Roadmap
 
 - [x] M1: Corpus ingestion + baseline single-shot RAG
@@ -102,6 +96,30 @@ scoring (M3).
   are extracted via regex and deduplicated; falls back to all retrieved chunk_ids
   if the model doesn't cite inline.
 
+**Critic agent (M3, in progress):**
+
+- `src/agents/critic.py` — splits a retriever sub-answer into individual claims
+  based on inline `[chunk_id]` citation markers (one claim per citation, not
+  grouped/deduplicated by chunk_id — an earlier version incorrectly merged
+  multiple claims citing the same chunk into a single judged unit, fixed by
+  keeping claims as a flat list). For each claim, an LLM judge
+  (`llama-3.1-8b-instant` — deliberately smaller/faster than the generation
+  model, since judging is a narrower task and keeps rate-limit budget healthier
+  for the M4 comparison run) determines whether the source chunk supports,
+  contradicts, or doesn't address the claim. Aggregates into a
+  `faithfulness_score` (proportion of claims marked "supported").
+- Manual spot-checking (not just trusting the critic's own output) found a real
+  limitation: the critic can mark a compound sentence as fully "supported" when
+  only part of it is actually backed by the source, anchoring on the
+  strongest-matching sub-claim and overlooking an unsupported clause riding
+  alongside it. A prompt-level guardrail against this was tested and did not
+  change the outcome on the known example. See
+  `notes/m3_critic_observations.md` for the specific example and full details.
+- Still to validate (Day 8): whether the critic correctly distinguishes
+  "contradicted" (source says otherwise) from "unsupported" (source doesn't
+  address it) on deliberately-injected wrong claims — required before M3 can
+  be considered complete per the project charter's success criteria.
+
 **Known limitations (to revisit in later milestones):**
 
 - Retrieval sometimes surfaces bibliography/reference-list chunks, since reference
@@ -125,6 +143,14 @@ scoring (M3).
 - The model's confidence-hedging is inconsistent within single answers (observed
   hedging at the start of an answer, stating claims plainly in the middle, then
   re-hedging at the end) — a good target for the critic agent to probe in M3.
+- The critic's faithfulness judgments can be overly generous on compound
+  sentences containing multiple sub-claims, correctly matching the strongest
+  part of a claim while missing an unsupported clause elsewhere in the same
+  sentence. A prompt-level mitigation was tried and did not resolve this on a
+  known example (see `notes/m3_critic_observations.md`).
+- The critic is drawn from the same model family (Llama, via Groq) as the
+  generator it's judging — this is not a fully independent judge, a known
+  limitation of LLM-as-judge setups generally, not unique to this project.
 
 ## Setup
 

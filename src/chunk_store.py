@@ -10,3 +10,11 @@ def load_chunks(path: str = CORPUS_CHUNKS_PATH) -> dict[str, str]:
             c = json.loads(line)
             chunks[c["chunk_id"]] = c["chunk_text"]
     return chunks
+
+
+def load_chunks_ordered(path: str = CORPUS_CHUNKS_PATH) -> list[dict]:
+    chunks = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            chunks.append(json.loads(line))
+    return chunks

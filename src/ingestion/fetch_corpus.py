@@ -1,21 +1,9 @@
 import requests
-from pypdf import PdfReader
 import io
 import os
 import time
-
-arxiv_ids = [
-    "2506.16988",
-    "2506.10844",
-    "2602.03442",
-    "2601.21912",
-    "2606.22681",
-    "2502.01142",
-    "2404.00610",
-    "2310.11511",
-    "2501.14342",
-    "2501.09136",
-]
+from pypdf import PdfReader
+from src.corpus_metadata import ARXIV_IDS
 
 
 def fetch_paper(arxiv_id: str, out_dir: str = "data/raw"):
@@ -34,6 +22,6 @@ def fetch_paper(arxiv_id: str, out_dir: str = "data/raw"):
         return False
 
 
-for id in arxiv_ids:
+for id in ARXIV_IDS:
     fetch_paper(id)
     time.sleep(1)

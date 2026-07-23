@@ -30,6 +30,14 @@ INDEPENDENT_2HOP_PAIRS = [
     ("2601.21912", "2502.01142"),
     ("2506.16988", "2506.10844"),
     ("2606.22681", "2501.14342"),
+    ("2310.11511", "2404.00610"),  # Self-RAG vs RQ-RAG
+    ("2501.09136", "2602.03442"),  # Survey vs A-RAG
+    ("2606.22681", "2502.01142"),  # Grounded Delta Planning vs DeepRAG
+    ("2601.21912", "2506.16988"),  # ProRAG vs RAGentA
+    ("2501.14342", "2404.00610"),  # Chain-of-Retrieval vs RQ-RAG
+    ("2506.10844", "2602.03442"),  # mRAG vs A-RAG
+    ("2310.11511", "2501.09136"),  # Self-RAG vs Survey
+    ("2606.22681", "2601.21912"),  # Grounded Delta Planning vs ProRAG
 ]
 
 # For dependent_2hop only: hand-verified chunks where one paper specifically

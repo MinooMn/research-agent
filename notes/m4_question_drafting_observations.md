@@ -1,4 +1,4 @@
-# Gold Question Drafting — Observations (M4, Day 9)
+# Gold Question Drafting — Observations
 
 ## v1: LLM drafting from titles alone fabricated content
 

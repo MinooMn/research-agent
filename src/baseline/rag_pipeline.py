@@ -3,6 +3,8 @@ from src.llm_client import generate
 from config import RETRIEVAL_TOP_K
 
 RAG_PROMPT_TEMPLATE = """Answer the question using ONLY the retrieved context below. \
+Cite the chunk_id for every claim you make, in square brackets immediately after \
+the claim, like this: "X does Y [chunk_id]." \
 If the context doesn't contain enough information to answer, say so explicitly.
 
 Question: {query}
@@ -10,7 +12,7 @@ Question: {query}
 Retrieved Context:
 {context}
 
-Answer:"""
+Answer (with inline [chunk_id] citations):"""
 
 
 def answer_question(query: str) -> dict:

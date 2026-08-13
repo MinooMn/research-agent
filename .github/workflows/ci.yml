@@ -19,7 +19,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: pytest tests/unit -v
+      - run: python -m pytest tests/unit -v
         env:
           # src modules import config.py, which raises at import time if this
           # is unset. The unit suite is pure logic and never calls the API.

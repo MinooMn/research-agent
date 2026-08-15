@@ -172,7 +172,7 @@ individual results are debuggable, then finish the full run and write up results
 
 ## Tech Stack
 
-- Python 3.11+
+- Python 3.10+
 - `sentence-transformers` (embeddings, local/free)
 - FAISS (vector index, local/free)
 - Groq API (LLM generation — free tier, `llama-3.3-70b-versatile` / `llama-3.1-8b-instant`)

@@ -1,5 +1,9 @@
 # Baseline vs Multi-Agent Comparison Results
 
+> **Note:** These results were produced with the original Llama 3.1/3.3 models via
+> Groq, prior to the migration to GPT-OSS-20B/120B following Groq's model
+> deprecation announcement. See `README.md`.
+
 ## Per-question results
 
 | ID | Category | Pipeline | Faithfulness | Correct | Latency (s) |

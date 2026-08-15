@@ -14,6 +14,11 @@ This is not a novel architecture — it reimplements patterns published in Self-
 RQ-RAG, and related work (see corpus below) — the contribution here is a controlled,
 measured comparison against a baseline, not a new method.
 
+> **Note:** Originally built on Llama 3.1/3.3 via Groq; migrated to
+> GPT-OSS-20B/120B following Groq's model deprecation announcement. The results
+> in `results/comparison_results.md` and the M4 analysis notes reflect the
+> previous (Llama) models.
+
 ## Corpus
 
 10 papers on agentic/multi-agent RAG (2023–2026), chosen so that genuine cross-paper
@@ -71,7 +76,7 @@ individual results are debuggable, then finish the full run and write up results
 
 - `src/retrieval.py` / `src/chunk_store.py` — shared retrieval and chunk-loading
   modules (single source of truth for reading `chunks.jsonl`).
-- `src/llm_client.py` — generic Groq API wrapper (`llama-3.3-70b-versatile`
+- `src/llm_client.py` — generic Groq API wrapper (`openai/gpt-oss-120b`
   default), with retry/backoff on rate limits.
 - `src/baseline/rag_pipeline.py` — retrieve → grounding-instructed prompt with
   inline `[chunk_id]` citations → generate → return `{query, answer, chunk_ids}`.
@@ -84,7 +89,7 @@ individual results are debuggable, then finish the full run and write up results
 - `src/agents/retriever.py` — per-sub-question grounded answering with inline
   `[chunk_id]` citations.
 - `src/agents/critic.py` — claim-level faithfulness judging
-  (`llama-3.1-8b-instant`). Validated against deliberately fabricated claims.
+  (`openai/gpt-oss-20b`). Validated against deliberately fabricated claims.
 - `src/agents/composer.py` — synthesizes a final answer from sub-answers,
   weighting by critic-verified faithfulness; explicitly flags when verified
   evidence is insufficient rather than filling gaps with unverified claims.
@@ -175,6 +180,6 @@ individual results are debuggable, then finish the full run and write up results
 - Python 3.10+
 - `sentence-transformers` (embeddings, local/free)
 - FAISS (vector index, local/free)
-- Groq API (LLM generation — free tier, `llama-3.3-70b-versatile` / `llama-3.1-8b-instant`)
+- Groq API (LLM generation — free tier, `openai/gpt-oss-120b` / `openai/gpt-oss-20b`)
 - MLflow (experiment tracking, local)
 - Streamlit (demo UI — planned, M5)

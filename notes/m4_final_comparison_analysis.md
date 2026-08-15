@@ -1,5 +1,9 @@
 # M4 Comparison Analysis — Manual Review of the Results
 
+> **Note:** This analysis is based on results produced with the original Llama
+> 3.1/3.3 models via Groq, prior to the migration to GPT-OSS-20B/120B following
+> Groq's model deprecation announcement. See `README.md`.
+
 Manual review of `results/comparison_checkpoint.jsonl` across the first 13 gold
 questions (both pipelines). Decision made not to further tune the system or rerun
 the full comparison after these findings, as the primary goal of this project was

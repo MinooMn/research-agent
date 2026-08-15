@@ -10,10 +10,10 @@ if not GROQ_API_KEY:
     )
 
 # Default settings
-GROQ_MODEL_DEFAULT = "llama-3.3-70b-versatile"
+GROQ_MODEL_DEFAULT = "openai/gpt-oss-120b"
 EMBEDDER_MODEL = "all-MiniLM-L6-v2"
 RETRIEVAL_TOP_K = 5
-CRITIC_MODEL = "llama-3.1-8b-instant"
+CRITIC_MODEL = "openai/gpt-oss-20b"
 
 # Paths
 INDEX_PATH = "data/index/faiss.index"

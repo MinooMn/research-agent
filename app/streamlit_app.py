@@ -17,6 +17,11 @@ st.caption(
     "critic -> composer multi-agent pipeline. Faithfulness score = share of "
     "cited claims the critic verified against the actual retrieved source text."
 )
+st.info(
+    "This is a RAG system answering questions about a fixed corpus of 10 arXiv "
+    "papers on agentic RAG — try asking about specific methods like Self-RAG, "
+    "RQ-RAG, or A-RAG"
+)
 
 
 @st.cache_resource(show_spinner="Loading embedding model and FAISS index (first run only)...")
